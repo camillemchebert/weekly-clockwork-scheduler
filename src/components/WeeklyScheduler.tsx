@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { ScheduleEvent, DayOfWeek } from "@/types";
+import { ScheduleEvent, DayOfWeek, Trailer } from "@/types";
 import { 
   DAYS_OF_WEEK, 
   generateTimeSlots, 
@@ -9,8 +9,10 @@ import {
   formatDate,
   isOverlapping
 } from "@/utils/dateUtils";
+import { TRAILERS } from "@/utils/trailerUtils";
 import TimeSlot from "./TimeSlot";
 import EventForm from "./EventForm";
+import TrailerSelector from "./TrailerSelector";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -24,6 +26,7 @@ const WeeklyScheduler = () => {
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | undefined>(undefined);
   const [defaultDay, setDefaultDay] = useState<DayOfWeek>(0);
   const [defaultTime, setDefaultTime] = useState("09:00");
+  const [selectedTrailer, setSelectedTrailer] = useState<Trailer>(TRAILERS[0]);
   
   const { toast } = useToast();
 
@@ -96,10 +99,17 @@ const WeeklyScheduler = () => {
   };
 
   const handleSaveEvent = (event: ScheduleEvent) => {
+    // Add trailer ID to the event
+    const eventWithTrailer = {
+      ...event,
+      trailerId: selectedTrailer.id
+    };
+    
     // Check for overlaps with existing events (except the current event being edited)
     const overlappingEvent = events.find(e => 
       e.id !== event.id && 
       e.day === event.day && 
+      e.trailerId === selectedTrailer.id &&
       isOverlapping(e.startTime, e.endTime, event.startTime, event.endTime)
     );
     
@@ -114,14 +124,14 @@ const WeeklyScheduler = () => {
     
     if (selectedEvent) {
       // Update existing event
-      setEvents(events.map(e => e.id === event.id ? event : e));
+      setEvents(events.map(e => e.id === event.id ? eventWithTrailer : e));
       toast({
         title: "Event updated",
         description: `"${event.title}" has been updated.`
       });
     } else {
       // Add new event
-      setEvents([...events, event]);
+      setEvents([...events, eventWithTrailer]);
       toast({
         title: "Event added",
         description: `"${event.title}" has been added to your schedule.`
@@ -140,9 +150,16 @@ const WeeklyScheduler = () => {
     });
   };
 
+  const handleTrailerChange = (trailer: Trailer) => {
+    setSelectedTrailer(trailer);
+  };
+
+  // Filter events for the selected trailer
+  const filteredEvents = events.filter(event => event.trailerId === selectedTrailer.id);
+
   return (
     <div className="flex flex-col h-full">
-      {/* Header with week navigation */}
+      {/* Header with week navigation and trailer selector */}
       <div className="flex justify-between items-center mb-4 px-2">
         <div className="flex items-center space-x-2">
           <Button
@@ -170,6 +187,12 @@ const WeeklyScheduler = () => {
             Today
           </Button>
         </div>
+        
+        <TrailerSelector 
+          selectedTrailer={selectedTrailer}
+          onTrailerChange={handleTrailerChange}
+        />
+        
         <h2 className="text-lg font-semibold">
           {formatDate(weekDates[0])} - {formatDate(weekDates[4])}
         </h2>
@@ -212,7 +235,7 @@ const WeeklyScheduler = () => {
                   key={`${day}-${time}`}
                   time={time}
                   day={day as DayOfWeek}
-                  events={events}
+                  events={filteredEvents}
                   onAddEvent={handleAddEvent}
                   onEventClick={handleEventClick}
                 />
