@@ -12,7 +12,10 @@ export interface ScheduleEvent {
 
 export type DayOfWeek = 0 | 1 | 2 | 3 | 4; // Monday to Friday
 
+export type TrailerStatus = "open" | "predeployment" | "deployed";
+
 export interface Trailer {
   id: string;
   name: string;
+  status: TrailerStatus;
 }

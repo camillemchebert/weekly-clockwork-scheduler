@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { ScheduleEvent, DayOfWeek, Trailer } from "@/types";
 import { 
@@ -30,9 +29,7 @@ const WeeklyScheduler = () => {
   
   const { toast } = useToast();
 
-  // Time labels on the left side (e.g., 7:00 AM, 7:15 AM)
   const timeLabels = timeSlots.map(slot => {
-    // Only show labels for whole and half hours
     const [hour, minute] = slot.split(":").map(Number);
     if (minute === 0 || minute === 30) {
       return { time: slot, label: getTimeSlotLabel(slot) };
@@ -40,7 +37,6 @@ const WeeklyScheduler = () => {
     return { time: slot, label: "" };
   });
 
-  // Load events from localStorage
   useEffect(() => {
     const savedEvents = localStorage.getItem("scheduler-events");
     if (savedEvents) {
@@ -48,22 +44,18 @@ const WeeklyScheduler = () => {
     }
   }, []);
 
-  // Save events to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem("scheduler-events", JSON.stringify(events));
   }, [events]);
 
-  // Update week dates when week offset changes
   useEffect(() => {
     const today = new Date();
     const currentDay = today.getDay(); // 0 is Sunday, 1 is Monday, etc.
     
-    // Calculate the date of Monday of the current week
     const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
     const monday = new Date(today);
     monday.setDate(today.getDate() + mondayOffset + (weekOffset * 7));
     
-    // Generate dates for Monday through Friday
     const newWeekDates: Date[] = [];
     for (let i = 0; i < 5; i++) {
       const date = new Date(monday);
@@ -99,13 +91,11 @@ const WeeklyScheduler = () => {
   };
 
   const handleSaveEvent = (event: ScheduleEvent) => {
-    // Add trailer ID to the event
     const eventWithTrailer = {
       ...event,
       trailerId: selectedTrailer.id
     };
     
-    // Check for overlaps with existing events (except the current event being edited)
     const overlappingEvent = events.find(e => 
       e.id !== event.id && 
       e.day === event.day && 
@@ -123,14 +113,12 @@ const WeeklyScheduler = () => {
     }
     
     if (selectedEvent) {
-      // Update existing event
       setEvents(events.map(e => e.id === event.id ? eventWithTrailer : e));
       toast({
         title: "Event updated",
         description: `"${event.title}" has been updated.`
       });
     } else {
-      // Add new event
       setEvents([...events, eventWithTrailer]);
       toast({
         title: "Event added",
@@ -154,13 +142,11 @@ const WeeklyScheduler = () => {
     setSelectedTrailer(trailer);
   };
 
-  // Filter events for the selected trailer
   const filteredEvents = events.filter(event => event.trailerId === selectedTrailer.id);
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header with week navigation and trailer selector */}
-      <div className="flex justify-between items-center mb-4 px-2">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 px-2 space-y-4 md:space-y-0">
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
@@ -198,9 +184,7 @@ const WeeklyScheduler = () => {
         </h2>
       </div>
 
-      {/* Calendar grid */}
       <div className="flex flex-col flex-1 overflow-hidden border rounded-md">
-        {/* Day headers */}
         <div className="flex border-b">
           <div className="w-20 min-w-[5rem] border-r bg-scheduler-highlight/20"></div>
           {DAYS_OF_WEEK.map((day, index) => (
@@ -214,9 +198,7 @@ const WeeklyScheduler = () => {
           ))}
         </div>
 
-        {/* Time grid */}
         <div className="flex flex-1 overflow-auto">
-          {/* Time labels */}
           <div className="w-20 min-w-[5rem] flex flex-col border-r bg-scheduler-highlight/10">
             {timeLabels.map(({ time, label }) => (
               <div key={time} className="h-6 text-right pr-2 text-xs text-gray-500 relative">
@@ -227,7 +209,6 @@ const WeeklyScheduler = () => {
             ))}
           </div>
 
-          {/* Days columns */}
           {[0, 1, 2, 3, 4].map((day) => (
             <div key={day} className="flex-1 border-r last:border-r-0">
               {timeSlots.map((time, timeIndex) => (
@@ -245,7 +226,6 @@ const WeeklyScheduler = () => {
         </div>
       </div>
 
-      {/* Event form dialog */}
       <EventForm
         isOpen={isEventFormOpen}
         event={selectedEvent}
