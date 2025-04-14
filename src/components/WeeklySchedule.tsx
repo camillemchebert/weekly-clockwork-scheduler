@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Edit, Trash } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import EventForm from './EventForm';
 
 interface WeeklyScheduleProps {
@@ -122,6 +122,7 @@ const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
+          <DialogTitle>Edit Event</DialogTitle>
           {editingEvent && (
             <EventForm 
               addEvent={handleEditSubmit} 
