@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ScheduleEvent, DayOfWeek } from '@/types/schedule';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 interface EventFormProps {
   addEvent: (event: ScheduleEvent) => void;
